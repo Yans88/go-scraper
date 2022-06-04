@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -20,6 +21,7 @@ func main() {
 	)
 	var items []item
 	c.OnHTML("div.col-sm-9 div[itemprop=itemListElement]", func(h *colly.HTMLElement) {
+
 		item := item{
 			Name:   h.ChildText("h2.product-title"),
 			Price:  h.ChildText("div.sale-price"),
@@ -38,15 +40,21 @@ func main() {
 	})
 
 	c.Visit("https://j2store.net/demo/index.php/shop")
-	content, err := json.Marshal(items)
+
+	content, err := JSONMarshal(items, true)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	os.WriteFile("products.json", content, 0644)
 }
 
-// Patreon: https://www.patreon.com/johnwatsonrooney (NEW)
-// Oxylabs: https://oxylabs.go2cloud.org/aff_c?of... - code JR15
-// Amazon UK: https://amzn.to/2OYuMwo
-// Hosting: Digital Ocean: https://m.do.co/c/c7c90f161ff6
-// Gear Used: https://jhnwr.com/gear/ (NEW)
+func JSONMarshal(v interface{}, safeEncoding bool) ([]byte, error) {
+    b, err := json.Marshal(v)
+
+    if safeEncoding {
+        b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
+        b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
+        b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
+    }
+    return b, err
+}
