@@ -1,3 +1,3 @@
 # go-scraper
 
-go-colly : http://go-colly.org/
+use go-colly : http://go-colly.org/
